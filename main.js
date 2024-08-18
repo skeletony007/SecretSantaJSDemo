@@ -23,7 +23,6 @@ function year() {
   const state = JSON.parse(stateAsString);
 
   validateJson(state, storage.stateSchema);
-  validateJson(JSON.parse(storage.file.getBlob().getDataAsString()), storage.stateSchema);
 
   const secretSanta = new SecretSanta(state);
   const santaPairs = secretSanta.draw();
