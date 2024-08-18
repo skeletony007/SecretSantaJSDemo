@@ -1,0 +1,56 @@
+{
+  "people": [
+    {
+      "name": "John",
+      "email": "john@example.com",
+      "recipients": [
+        {"name": "Paul", "weight": 1, "frequency": 0},
+        {"name": "George", "weight": 1, "frequency": 0},
+        {"name": "Ringo", "weight": 1, "frequency": 0}
+      ],
+      "stats": {
+        "recipientRepeatFrequency": 0,
+        "previousRecipient": ""
+      }
+    },
+    {
+      "name": "Paul",
+      "email": "paul@example.com",
+      "recipients": [
+        {"name": "John", "weight": 1, "frequency": 0},
+        {"name": "George", "weight": 1, "frequency": 0},
+        {"name": "Ringo", "weight": 1, "frequency": 0}
+      ],
+      "stats": {
+        "recipientRepeatFrequency": 0,
+        "previousRecipient": ""
+      }
+    },
+    {
+      "name": "George",
+      "email": "george@example.com",
+      "recipients": [
+        {"name": "John", "weight": 1, "frequency": 0},
+        {"name": "Paul", "weight": 1, "frequency": 0},
+        {"name": "Ringo", "weight": 1, "frequency": 0}
+      ],
+      "stats": {
+        "recipientRepeatFrequency": 0,
+        "previousRecipient": ""
+      }
+    },
+    {
+      "name": "Ringo",
+      "email": "ringo@example.com",
+      "recipients": [
+        {"name": "John", "weight": 1, "frequency": 0},
+        {"name": "Paul", "weight": 1, "frequency": 0},
+        {"name": "George", "weight": 1, "frequency": 0}
+      ],
+      "stats": {
+        "recipientRepeatFrequency": 0,
+        "previousRecipient": ""
+      }
+    }
+  ]
+}
