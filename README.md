@@ -1,10 +1,24 @@
 # JavaScript Secret Santa Pairing System Demo
 
-Demonstration of [SecretSantaJS] using [Google Apps Script].
+Various demonstrations of [SecretSantaJS].
 
-Visual example: <https://skeletony007.github.io/SecretSantaJSDemo/>
+# Table of Contents
 
-# Usage
+<!--toc:start-->
+- [JavaScript Secret Santa Pairing System Demo](#javascript-secret-santa-pairing-system-demo)
+- [Table of Contents](#table-of-contents)
+- [Usage Example: Website](#usage-example-website)
+- [Usage Example: Apps Script](#usage-example-apps-script)
+- [Test using Node.js](#test-using-nodejs)
+<!--toc:end-->
+
+# Usage Example: Website
+
+URL: <https://skeletony007.github.io/SecretSantaJSDemo/>
+
+# Usage Example: Apps Script
+
+Using [Google Apps Script] and [clasp].
 
 1. **Clone this repo**
 
@@ -16,9 +30,9 @@ Visual example: <https://skeletony007.github.io/SecretSantaJSDemo/>
 2. **Create new Apps Script project using [clasp]**
 
    ```
-   clasp create --type standalone
-   cp .clasp.json .clasp.json.backup
-   jq --arg pwd "$PWD" '. + {
+   clasp create --type standalone \
+   && cp .clasp.json .clasp.json.backup \
+   && jq --arg pwd "$PWD" '. + {
      "rootDir": $pwd,
      "filePushOrder": [
        $pwd + "/SecretSantaJS/utils/json-validator.js",
@@ -26,6 +40,9 @@ Visual example: <https://skeletony007.github.io/SecretSantaJSDemo/>
        $pwd + "/SecretSantaJS/secret-santa.js",
        $pwd + "/main.js"
      ],
+   }' .clasp.json > .clasp.json.tmp && mv .clasp.json.tmp .clasp.json \
+   && cp appsscript.json appsscript.json.backup \
+   && jq '. + {
      "timeZone": "Europe/London",
      "exceptionLogging": "STACKDRIVER",
      "runtimeVersion": "V8",
@@ -33,11 +50,13 @@ Visual example: <https://skeletony007.github.io/SecretSantaJSDemo/>
        "https://www.googleapis.com/auth/drive.readonly",
        "https://www.googleapis.com/auth/drive"
      ]
-   }' .clasp.json > .clasp.json.tmp && mv .clasp.json.tmp .clasp.json
-   clasp push -f
+   }' appsscript.json > appsscript.json.tmp && mv appsscript.json.tmp appsscript.json \
+   && clasp push -f
    ```
 
-# Test using [Node.js]
+# Test using Node.js
+
+Using [Node.js], execute the following command:
 
 ```
 node <( \
