@@ -2,6 +2,8 @@
 
 Demonstration of [SecretSantaJS] using [Google Apps Script].
 
+Visual example: <https://skeletony007.github.io/SecretSantaJSDemo/>
+
 # Usage
 
 1. **Clone this repo**
