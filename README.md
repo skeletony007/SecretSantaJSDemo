@@ -48,7 +48,8 @@ Using [Google Apps Script] and [clasp].
      "runtimeVersion": "V8",
      "oauthScopes": [
        "https://www.googleapis.com/auth/drive.readonly",
-       "https://www.googleapis.com/auth/drive"
+       "https://www.googleapis.com/auth/drive",
+       "https://www.googleapis.com/auth/script.send_mail"
      ]
    }' appsscript.json > appsscript.json.tmp && mv appsscript.json.tmp appsscript.json \
    && clasp push -f

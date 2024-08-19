@@ -46,7 +46,7 @@ function year() {
 
   const date = new Date();
   santaPairs.forEach(pair => {
-    console.info(`🎄 ${pair.name} has ${pair.recipient} for Secret Santa.`);
+    console.info(`🎄 Processing ${pair.name}.`);
     MailApp.sendEmail({
       to: nameToEmail.get(pair.name),
       subject: `Secret Santa ${date.getFullYear()} results for ${pair.name}`,
