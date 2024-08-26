@@ -7,16 +7,16 @@ Various demonstrations of [SecretSantaJS].
 <!--toc:start-->
 - [JavaScript Secret Santa Pairing System Demo](#javascript-secret-santa-pairing-system-demo)
 - [Table of Contents](#table-of-contents)
-- [Usage Example: Website](#usage-example-website)
-- [Usage Example: Apps Script](#usage-example-apps-script)
+- [Usage Example - Website](#usage-example-website)
+- [Usage Example - Apps Script](#usage-example-apps-script)
 - [Test using Node.js](#test-using-nodejs)
 <!--toc:end-->
 
-# Usage Example: Website
+# Usage Example - Website
 
 URL: <https://skeletony007.github.io/SecretSantaJSDemo/>
 
-# Usage Example: Apps Script
+# Usage Example - Apps Script
 
 Using [Google Apps Script] and [clasp].
 
@@ -35,9 +35,10 @@ Using [Google Apps Script] and [clasp].
    && jq --arg pwd "$PWD" '. + {
      "rootDir": $pwd,
      "filePushOrder": [
-       $pwd + "/SecretSantaJS/utils/json-validator.js",
-       $pwd + "/SecretSantaJS/hat.js",
-       $pwd + "/SecretSantaJS/secret-santa.js",
+       $pwd + "/SecretSantaJS/utils/validateJson.js",
+       $pwd + "/SecretSantaJS/Hat.js",
+       $pwd + "/SecretSantaJS/SecretSantaParticipant.js",
+       $pwd + "/SecretSantaJS/SecretSanta.js",
        $pwd + "/main.js"
      ],
    }' .clasp.json > .clasp.json.tmp && mv .clasp.json.tmp .clasp.json \
@@ -61,15 +62,17 @@ Using [Node.js], execute the following command:
 
 ```
 node <( \
-    echo 'var state = '; \
+    echo 'var data = '; \
     cat \
-      secretsanta.json \
-      SecretSantaJS/utils/json-validator.js \
-      SecretSantaJS/hat.js \
-      SecretSantaJS/secret-santa.js \
+      example-data.json \
+      SecretSantaJS/utils/validateJson.js \
+      SecretSantaJS/Hat.js \
+      SecretSantaJS/SecretSantaParticipant.js \
+      SecretSantaJS/SecretSanta.js \
       main.js; \
     echo 'console.log(JSON.stringify(test(100)))' \
   )
+
 ```
 
 [SecretSantaJS]: https://github.com/skeletony007/SecretSantaJS

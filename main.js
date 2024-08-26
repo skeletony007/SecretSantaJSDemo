@@ -7,24 +7,30 @@ function year() {
   const storage = {
     file: DriveApp.getFileById(''), // TODO: Fill this in.
     backup: DriveApp.getFileById(''), // TODO: Fill this in.
-    stateSchema: {
-      people: [
+    dataSchema: {
+      state: [
         {
           name: 'string',
-          email: 'string',
-          recipients: [{name: 'string', weight: 'number', frequency: 'number'}],
-          stats: {recipientRepeatFrequency: 'number', previousRecipient: 'string'},
+          stats: {
+            meanRecipientWeight: 'number',
+            previousRecipient: 'string',
+            recipientRepeatFrequency: 'number',
+            recipients: [{name: 'string', weight: 'number', frequency: 'number'}],
+          },
         },
       ],
     },
   };
 
   const stateAsString = storage.file.getBlob().getDataAsString();
-  const state = JSON.parse(stateAsString);
+  const data = JSON.parse(stateAsString);
 
-  validateJson(state, storage.stateSchema);
+  validateJson(data, storage.dataSchema);
 
-  const secretSanta = new SecretSanta(state);
+  const secretSanta = new SecretSanta(data.state);
+
+  for (let name of data.participants) secretSanta.addParticipant(name);
+
   const santaPairs = secretSanta.draw();
 
   const recipients = new Set();
@@ -40,9 +46,7 @@ function year() {
   }
 
   const nameToEmail = new Map();
-  for (const person of state.people) {
-    nameToEmail.set(person.name, person.email);
-  }
+  for (const contact of data.contacts) nameToEmail.set(contact.name, contact.email);
 
   const date = new Date();
   santaPairs.forEach(pair => {
@@ -58,38 +62,48 @@ function year() {
     });
   });
 
-  const nextDataAsString = JSON.stringify(secretSanta.toJSON());
+  data.state = secretSanta.toJSON();
+  const nextStateAsString = JSON.stringify(data);
 
-  validateJson(nextDataAsString, storage.stateSchema);
+  validateJson(data, storage.dataSchema);
 
   storage.backup.setContent(stateAsString);
-  storage.file.setContent(nextDataAsString);
+  storage.file.setContent(nextStateAsString);
 }
 
 function test(years) {
-  for (let i = 0; i < years; i++) {
-    const secretSanta = new SecretSanta(state);
-    const draw = secretSanta.draw();
-    state = secretSanta.toJSON();
+  const secretSanta = new SecretSanta(data.state);
 
-    validateJson(state, {
-      people: [
+  for (let i = 0; i < years; i++) {
+    validateJson(data, {
+      state: [
         {
           name: 'string',
-          email: 'string',
-          recipients: [{name: 'string', weight: 'number', frequency: 'number'}],
-          stats: {recipientRepeatFrequency: 'number', previousRecipient: 'string'},
+          stats: {
+            meanRecipientWeight: 'number',
+            previousRecipient: 'string',
+            recipientRepeatFrequency: 'number',
+            recipients: [{name: 'string', weight: 'number', frequency: 'number'}],
+          },
         },
       ],
     });
 
+    secretSanta.clear();
+
+    for (let name of data.participants) secretSanta.addParticipant(name);
+
+    const pairs = secretSanta.draw();
+
+    data.state = secretSanta.toJSON();
+
     const recipients = new Set();
-    for (let i = 0; i < draw.length; i++) {
-      const pair = draw[i];
+    for (let i = 0; i < pairs.length; i++) {
+      const pair = pairs[i];
       if (recipients.has(pair.recipient)) {
-        throw new Error('Duplicate recipients found in Secret Santa pairs. Emails will not be sent.');
+        throw new Error('Duplicate recipients found in Secret Santa pairs.');
       } else if (pair.name == pair.recipient) {
-        throw new Error('Pair name matches recipient name in Secret Santa pairs. Emails will not be sent.');
+        throw new Error('Pair name matches recipient name in Secret Santa pairs.');
       } else {
         recipients.add(pair.recipient);
       }
@@ -98,10 +112,10 @@ function test(years) {
 
   console.log(
     'Average number of repeated recipients per year:',
-    state.people.reduce((acc, person) => {
-      return acc + person.stats.recipientRepeatFrequency;
+    data.state.reduce((acc, participant) => {
+      return acc + participant.stats.recipientRepeatFrequency;
     }, 0) / years
   );
 
-  return state;
+  return data;
 }

@@ -3,79 +3,205 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Secret Santa Results</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f0f0f0;
-      }
-      .container {
-        max-width: 800px;
-        margin: 20px auto;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      }
-      h1 {
-        text-align: center;
-        color: #333;
-      }
-      .result {
-        margin-bottom: 10px;
-        padding: 10px;
-        border-radius: 5px;
-        background-color: #f9f9f9;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-      }
-      .result h2 {
-        margin-top: 0;
-        color: #555;
-      }
-      .result p {
-        margin: 5px 0;
-        color: #777;
-      }
-    </style>
+    <title>skeletony007's Secret Santa Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu+Mono" />
   </head>
   <body>
-    <div class="container">
-      <h1>Secret Santa Results</h1>
-      <div id="results">
-        <!-- Results will be inserted here -->
+    <div class="wrapper">
+      <div class="container">
+        <h1>Secret Santa Widget</h1>
+
+        <!-- Form to input participants -->
+        <form id="santaForm">
+          <div id="participantFields">
+            <!-- Participant fields will be inserted here -->
+          </div>
+          <button type="button" id="addParticipantBtn">Add Participant</button>
+          <input type="submit" value="Generate Pairs" />
+        </form>
+
+        <div id="results">
+          <!-- Results will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Message container -->
+      <div id="messageContainer" class="hidden"></div>
+
+      <!-- JSON State container -->
+      <div id="stateContainer">
+        <textarea id="stateEditor" rows="10" placeholder="Secret Santa game state e.g. []" title="State"></textarea>
+        <button id="downloadStateBtn" class="icon-button" title="Download State">
+          <span id="downloadStateBtnIcn">&#x21E9;</span>
+        </button>
       </div>
     </div>
 
-    <script src="SecretSantaJS/utils/json-validator.js"></script>
-    <script src="SecretSantaJS/hat.js"></script>
-    <script src="SecretSantaJS/secret-santa.js"></script>
+    <footer>
+      <p>SecretSantaJS Demo by skeletony007</p>
+      <p>
+        Source code: <a href="https://github.com/skeletony007/SecretSantaJSDemo">GitHub - SecretSantaJSDemo</a> |
+        SecretSantaJS: <a href="https://github.com/skeletony007/SecretSantaJS">GitHub - SecretSantaJS</a>
+      </p>
+    </footer>
+
+    <script src="SecretSantaJS/utils/validateJson.js"></script>
+    <script src="SecretSantaJS/Hat.js"></script>
+    <script src="SecretSantaJS/SecretSantaParticipant.js"></script>
+    <script src="SecretSantaJS/SecretSanta.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
     <script>
-      // Fetch the state from secretsanta.json
-      fetch('example-state.json')
+      const secretSanta = new SecretSanta([]);
+
+      function addParticipantField(name = '') {
+        const participantFields = document.getElementById('participantFields');
+        const newField = document.createElement('div');
+        newField.classList.add('name-field');
+        newField.innerHTML = `
+          <input type="text" name="names" placeholder="Enter participant name" required value="${name}" />
+          <button type="button" class="remove-field-btn">Remove</button>
+        `;
+
+        newField.querySelector('.remove-field-btn').addEventListener('click', function () {
+          newField.remove();
+        });
+
+        participantFields.appendChild(newField);
+      }
+
+      function clearForm() {
+        document.getElementById('participantFields').innerHTML = '';
+      }
+
+      function clearResults() {
+        document.getElementById('results').innerHTML = '';
+      }
+
+      function clearMessages() {
+        const messageContainer = document.getElementById('messageContainer');
+        messageContainer.classList.add('hidden');
+        messageContainer.innerHTML = '';
+      }
+
+      function showMessage(message) {
+        const messageContainer = document.getElementById('messageContainer');
+        messageContainer.textContent = message;
+        messageContainer.classList.remove('hidden');
+      }
+
+      function addResult(pair) {
+        const resultDiv = document.createElement('div');
+        resultDiv.classList.add('result');
+        resultDiv.innerHTML = `
+          <h2>${pair.name}</h2>
+          <p>Recipient: <span class="redacted">${pair.recipient}</span></p>
+        `;
+        document.getElementById('results').appendChild(resultDiv);
+      }
+
+      function setStateEditorValue(state) {
+        const stateEditor = document.getElementById('stateEditor');
+        stateEditor.value = JSON.stringify(state, null, 2);
+        stateEditor.style.height = 'auto';
+        stateEditor.style.height = stateEditor.scrollHeight + 'px';
+      }
+
+      function showConfetti(object) {
+        const rect = object.getBoundingClientRect();
+
+        const x = (rect.left + rect.width / 2) / window.innerWidth;
+        const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: {x: x, y: y},
+        });
+      }
+
+      document.getElementById('stateEditor').addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+        clearMessages();
+        try {
+          secretSanta.setState(JSON.parse(this.value));
+        } catch (error) {
+          showMessage(error);
+        }
+      });
+
+      document.getElementById('downloadStateBtn').addEventListener('click', function () {
+        // Get the JSON content from the stateEditor
+        const jsonContent = document.getElementById('stateEditor').value;
+
+        // Create a Blob from the JSON content
+        const blob = new Blob([jsonContent], {type: 'application/json'});
+
+        // Create an anchor element for download
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'state.json';
+
+        // Append anchor to body, click to trigger download, and remove it
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+
+      document.getElementById('addParticipantBtn').addEventListener('click', function () {
+        addParticipantField();
+      });
+
+      document.getElementById('santaForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        clearResults();
+        clearMessages();
+        secretSanta.clear();
+
+        try {
+          const names = Array.from(document.querySelectorAll('input[name="names"]')).map(input => input.value.trim());
+
+          for (let name of names) secretSanta.addParticipant(name);
+
+          const pairs = secretSanta.draw().sort((a, b) => a.name.localeCompare(b.name));
+
+          setStateEditorValue(secretSanta.toJSON());
+
+          try {
+            showConfetti(document.getElementById('results'));
+          } catch (e) {
+            /** Confetti is not important */
+          }
+
+          for (let pair of pairs) addResult(pair);
+        } catch (error) {
+          showMessage(`Error adding participant to Secret Santa game: ${error.message} Please try again.`);
+          console.error('Error adding participant to Secret Santa game:', error);
+        }
+      });
+
+      fetch('example-data.json')
         .then(response => response.json())
-        .then(state => {
-          // Initialize Secret Santa with the fetched state
-          const secretSanta = new SecretSanta(state);
-          const santaPairs = secretSanta.draw();
+        .then(exampleData => {
+          clearForm();
+          clearMessages();
+          for (let name of exampleData.participants) addParticipantField(name);
 
-          const resultsContainer = document.getElementById('results');
-
-          // Display Secret Santa results
-          santaPairs.sort((a, b) => a.name.localeCompare(b.name));
-          santaPairs.forEach(pair => {
-            const resultDiv = document.createElement('div');
-            resultDiv.classList.add('result');
-            resultDiv.innerHTML = `
-              <h2>${pair.name}</h2>
-              <p>Secret Santa Recipient: ${pair.recipient}</p>
-            `;
-            resultsContainer.appendChild(resultDiv);
-          });
+          setStateEditorValue(exampleData.state);
         })
-        .catch(error => console.error('Error fetching the state:', error));
+        .catch(error => console.error(error));
+
+      const stateEditor = document.getElementById('stateEditor');
+      stateEditor.style.height = 'auto';
+      stateEditor.style.height = stateEditor.scrollHeight + 'px';
+      try {
+        secretSanta.setState(JSON.parse(stateEditor.value));
+      } catch (error) {
+        showMessage(error);
+      }
     </script>
   </body>
 </html>
